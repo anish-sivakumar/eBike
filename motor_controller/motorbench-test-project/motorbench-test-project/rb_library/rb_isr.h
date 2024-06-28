@@ -22,6 +22,7 @@ extern "C" {
 #include "rb_pwm.h"
 #include "rb_board_ui.h"
 #include "timer/sccp4.h"
+#include "spi_host/spi1.h"
  
 typedef enum 
 {   
@@ -41,6 +42,9 @@ RB_BOOTSTRAP bootstrap;
 RB_BOARD_UI boardUI;
 
 uint16_t TMR4_testing; //delete me
+
+uint16_t SPI_counter;
+uint8_t  SPI_received;
 
 
 /** system data, accessed directly */
@@ -82,6 +86,7 @@ void __attribute__((interrupt, auto_psv)) HAL_ADC_ISR(void)
             RB_FixedFrequencySinePWMInit(); //for testing
             RB_BoardUIInit(&boardUI);
             
+            SPI_counter = 0;
             state = RBFSM_STARTUP;
             break;
             
@@ -148,6 +153,8 @@ void __attribute__((interrupt, auto_psv)) HAL_ADC_ISR(void)
             break;      
         
     }
+
+    // TODO: Do CAN servicing here. Should be able to send or receive one CAN message per iteration 
     
     HAL_ADC_InterruptFlag_Clear(); // interrupt flag must be cleared after data is read from buffer
     X2CScope_Update();

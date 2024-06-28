@@ -8,14 +8,23 @@
 #include "motorBench/timing.h"
 #include "hal/hardware_access_functions.h"
 #include "motorbench/diagnostics.h"
+#include "timer/delay.h"
 
 #include "X2CScope.h"
 #include "rb_library/rb_hall.h"
 #include "rb_library/rb_control.h"
 #include "rb_library/rb_pwm.h"
+#include "rb_library/rb_mcp.h"
+
 
 void RB_MainInit(void);
 void RB_SystemStart(void);
+
+// temporary checks for SPI comms
+uint16_t canInitErrors;
+uint8_t canReadResult;
+uint16_t canTest1;
+uint16_t canTest2;
 
 
 /*
@@ -45,8 +54,14 @@ int main(void)
  */
 void RB_MainInit (void)
 {
-    SYSTEM_Initialize();
+    SYSTEM_Initialize();  
     
+    canInitErrors = RB_MCP_Init();
+    // Added for testing, can be removed later
+    RB_MCP_GetReg(MCP_REG_CANSTAT, &canReadResult);
+    RB_MCP_ReadStat(&canReadResult);
+    
+
     /* PWM Init from MCAF_ConfigurationPwmUpdate */
     RB_PWMInit();
           
