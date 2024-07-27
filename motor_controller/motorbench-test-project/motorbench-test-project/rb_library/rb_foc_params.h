@@ -47,6 +47,8 @@ extern "C" {
 // Safety Fault related
 #define     RB_PHASECURRENT_MAX     21000  // 28A peak
 #define     RB_BRIDGETEMP_MAX       75 // MOSFET data sheet says 150C max
+#define     RB_IPH_FAULT_SAMPLES    100 // number of samples to check if faulted
+#define     RB_IPH_FAULT_SAMPLES_LIMIT 50 // number of times current > max over RB_IPH_FAULT_SAMPLES
     
 // Throttle input from CAN
 #define     MAX_THROTTLE_INPUT      100

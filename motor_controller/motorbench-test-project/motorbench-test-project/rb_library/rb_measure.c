@@ -4,6 +4,8 @@
 #include "motorBench/util.h"
 #include "rb_foc_params.h"
 
+int16_t faultSampleCount = 0; // counts till RB_IPH_FAULT_SAMPLES
+int16_t iphFaultCount = 0; // fault current > max, RB_IPH_FAULT_SAMPLES_THRESH times in sampling period
 
 void RB_ADCCalibrationInit(RB_MEASURE_CURRENT_T *pcalib)
 {
@@ -111,13 +113,29 @@ void RB_FaultInit(RB_FAULT_DATA *state)
 
 bool RB_PhaseCurrentFault(MC_ABC_T *piabc)
 {
-    bool tempFault = true; //assume faulted
+    bool tempFault = false; 
+    
+    faultSampleCount++;
     
     // check phase currents
-    if ((UTIL_Abs16(piabc->a) <= RB_PHASECURRENT_MAX) || (UTIL_Abs16(piabc->b) <= RB_PHASECURRENT_MAX))
+    if ((UTIL_Abs16(piabc->a) >= RB_PHASECURRENT_MAX) || (UTIL_Abs16(piabc->b) >= RB_PHASECURRENT_MAX))
     {
-        tempFault = false;
+        iphFaultCount++; // detected high current once
     } 
+    
+    // after ~100 samples check how many faults detected
+    if (faultSampleCount >= RB_IPH_FAULT_SAMPLES)
+    {
+        // if enough faults detected to be sure current is too high
+        if (iphFaultCount >= RB_IPH_FAULT_SAMPLES_LIMIT)
+        {
+            tempFault = true;
+        } else
+        { // reset counters  
+            faultSampleCount = 0;
+            iphFaultCount = 0;
+        }
+    }
     
     return tempFault;
 }
