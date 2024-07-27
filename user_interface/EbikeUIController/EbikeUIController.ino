@@ -104,7 +104,7 @@ void timerISR() {
   if (currentRegenState == LOW && previousRegenState == HIGH) {
     // Detect falling edge and check debounce time
     if (currentTime - lastRegenTime > 25) {      // Debounce time of 25ms
-      regenMethod = (regenMethod == 1) ? 2 : 1;  // Toggle between regen method 1 and 2
+      regenMethod = (regenMethod == 3) ? 1 : regenMethod + 1; // toggle through 1,2,3
       lastRegenTime = currentTime;               // Update last regen event time
     }
   }
@@ -123,12 +123,21 @@ void timerISR() {
   if (currentBrakeState <= -5) { //safety factor to not trigger on noise
 
     throttle = (int8_t)currentBrakeState;
-    if (regenMethod == 1) {
-      handleThrottleInput(REGEN, throttle, activatedRegen, DIGITAL); // Digital Ebrake request
-    } 
-    else if (regenMethod == 2) {
-      handleThrottleInput(REGEN, throttle, activatedRegen, ANALOG); // Analog Ebrake request
+    
+    switch (regenMethod){
+      case 1:
+        handleThrottleInput(REGEN, throttle, activatedRegen, DIGITAL); // Digital Ebrake request
+        break;
+
+      case 2:
+        handleThrottleInput(REGEN, throttle, activatedRegen, ANALOG); // Analog Ebrake request
+        break;
+
+      case 3:
+        
+        break;
     }
+    
     
   } else {
     if (activatedRegen) {
